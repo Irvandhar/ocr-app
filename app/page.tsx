@@ -55,6 +55,7 @@ export default function Home() {
   const [result, setResult] = useState<ResultData>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [shouldStore, setShouldStore] = useState(false);
 
   async function handleExtract() {
     if (!file) return;
@@ -69,7 +70,7 @@ export default function Home() {
       const res = await fetch(FORMAT_CONFIG[format].endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64 }),
+        body: JSON.stringify({ imageBase64, store: shouldStore }),
       });
 
       const json = await res.json();
@@ -108,11 +109,9 @@ export default function Home() {
     <main className="min-h-screen bg-gray-950 text-gray-100 p-8">
       <div className="max-w-3xl mx-auto">
 
-        {/* Header */}
         <h1 className="text-3xl font-bold mb-1">PDF OCR Extractor</h1>
         <p className="text-gray-400 mb-8">Extract structured JSON from MKT Document</p>
 
-        {/* Format Selector */}
         <div className="mb-6">
           <p className="text-sm text-gray-400 mb-3">Select document format:</p>
           <div className="grid grid-cols-3 gap-3">
@@ -133,7 +132,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Upload Area */}
         <div
           onClick={() => fileInputRef.current?.click()}
           onDragOver={(e) => e.preventDefault()}
@@ -161,13 +159,19 @@ export default function Home() {
             )
           }
         </div>
-
-        {/* Status Banners */}
-        {status === "converting" && <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 mb-4 text-blue-300 text-sm">⏳ Rendering PDF at high resolution...</div>}
+          <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={shouldStore}
+            onChange={(e) => setShouldStore(e.target.checked)}
+            className="accent-blue-500"
+          />
+          Save to Pinecone after extraction
+        </label>
+        {status === "converting" && <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 mb-4 text-blue-300 text-sm">⏳ Rendering PDF...</div>}
         {status === "processing" && <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-3 mb-4 text-yellow-300 text-sm">🔍 Extracting fields via OpenRouter ({cfg.label})...</div>}
         {status === "error" && <div className="bg-red-900/30 border border-red-700 rounded-lg p-3 mb-4 text-red-300 text-sm">❌ {error}</div>}
 
-        {/* Action Buttons */}
         <div className="flex gap-3 mb-8">
           <button onClick={handleExtract} disabled={!file || isLoading}
             className="bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold px-6 py-2.5 rounded-lg transition-colors text-sm">

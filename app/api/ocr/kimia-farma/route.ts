@@ -1,28 +1,31 @@
-// app/api/ocr/kimia-farma/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { extractKimiaFarmaSkb } from "@/lib/ocr/kimia-farma-skb-extractor";
+import { storeDocument } from "@/lib/store-document";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
-    console.log("Request body length:", body.length);
 
     if (!body) {
       return NextResponse.json({ error: "Empty request body" }, { status: 400 });
     }
 
-    const { imageBase64 } = JSON.parse(body);
+    const { imageBase64, store } = JSON.parse(body);
 
     if (!imageBase64) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
 
-    console.log("Image base64 length:", imageBase64.length);
-
     const result = await extractKimiaFarmaSkb(imageBase64);
-    return NextResponse.json({ success: true, data: result });
+
+    let pineconeId: string | null = null;
+    if (store) {
+      pineconeId = await storeDocument("kimia-farma-skb", result);
+    }
+
+    return NextResponse.json({ success: true, data: result, pineconeId });
 
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
