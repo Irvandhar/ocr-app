@@ -37,6 +37,7 @@ export function buildPinkDanexPrompt(): string {
     "resi_number": "...",
     "origin": "...",
     "destination": "..."
+    "data":"look for string 'DATE OF SHIPMENT/TANGGAL PENGIRIMAN' and extract DD-MMM-YYYY below it, extract it and changed the format to YYY"
   }`;
 }
 
@@ -50,7 +51,7 @@ export function buildLotteSJPrompt(): string {
   {
     "header": {
       "document_no": "...",
-      "date": "...",
+      "date": "look for String 'Stri cfm dt:' and extract DD-MMM-YYYY next to it",
       "store": { "name": "...", "code": "...", "address": "...", "city": "..." },
       "sender": { "name": "PT. LOTTE SHOPPING INDONESIA", "address": "...", "city": "..." }
     },
